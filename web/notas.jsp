@@ -1,3 +1,5 @@
+<%@page import="org.json.JSONException"%>
+<%@page import="org.json.JSONObject"%>
 <%@page import="Modelos.Nota"%>
 <%@page import="java.util.List"%>
 <%@page import="Modelos.Usuario"%>
@@ -19,7 +21,6 @@
         <link rel="stylesheet" href="css/notes.css">
         <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
         <title>Remember - Notas</title>
-
     </head>
 
     <body>
@@ -54,6 +55,13 @@
                             <p class="tool-name">Ir a inicio</p>
                         </a>
                     </div>
+                    <%if (con.getRol(idUser) == 1) {%>
+                    <div class="tool">
+                        <a href="administrador.jsp"><i class="ri-user-settings-line"></i>
+                            <p class="tool-name">Administración</p>
+                        </a>
+                    </div>
+                    <%}%>                                    
                     <div class="tool">
                         <a href="cerrar-sesion.jsp"><i class="ri-door-open-line"></i>
                             <p class="tool-name">Cerrar sesión</p>
@@ -84,37 +92,35 @@
                     </div>
                 </div>
             </div>
-
-            <!--CREACIÓN DE NOTAS----------------------------------------------------->
-            <div id="app">
-                <%
-                    List<Nota> lista = con.getNotasUser(idUser);
-                    for (int i = 0; i < lista.size(); i++) {
-                %>
-                <div class="note-container" style="background-color: <%=lista.get(i).getFondo()%>;" id="<%=lista.get(i).getId_note()%>">
-                    <ul class="funciones-nota">
-                        <li class="icono-gotita">
-                            <img src="./images/notas/gotita-icono.jpg">
-                        </li>
-                        <li class="icono-reloj">
-                            <img src="./images/notas/reloj-icono.png">
-                        </li>
-                    </ul>
-                    <textarea class="note" placeholder="Nota vacia" style="color: <%=lista.get(i).getColor()%>; background-color: <%=lista.get(i).getFondo()%>;"><%=lista.get(i).getContenido()%></textarea>
-                </div>
-                <%
-                    }
-                %>
-                <button class="add-note" type="button">+</button>
-            </div>
-
             <!--RELOJ---------------------------------------------------------------->
             <div class="reminder-form-container container" id="reminder-form-container">
                 <div class="form-container-inner">
-                    <form action="" class="form">
-                        <p id="instruction">Selecciona la fecha y hora</p>
-                        <input class="form-input" type="datetime-local">
-                        <button class="btn form-input" type="submit">
+                    <form action="SendEmail" method="post" class="form">
+                        <p id="instruction">Recordar en:</p>
+                        <select name="numbers" id="numbers">
+                            <option value="">1</option>
+                            <option value="">2</option>
+                            <option value="">3</option>
+                            <option value="">4</option>
+                            <option value="">5</option>
+                            <option value="">6</option>
+                            <option value="">7</option>
+                            <option value="">8</option>
+                            <option value="">9</option>
+                            <option value="">10</option>
+                            <option value="">11</option>
+                            <option value="">12</option>
+                        </select>
+
+                        <select name="dates" id="dates">
+                            <optgroup>
+                                <option value="minutes">minutos</option>
+                                <option value="hours">horas</option>
+                                <option value="days">dias</option>
+                            </optgroup>
+                        </select>
+
+                        <button class="btn form-input" id="sendEmail" type="submit">
                             Elegir
                         </button>
                     </form>
@@ -127,11 +133,11 @@
             </div>
             <!--Editar Perfil---------------------------------------------------------------->
             <div class="update-form-container container" id="update-form-container">
-                <div class="form-container-inner" style="background-color: white; width: 50%; padding: 15px; border-radius: 10px">
+                <div class="form-container-inner" style="background-color: white; width: 50%; padding: 15px; border-radius: 10px" enctype="multipart/form-data">
                     <form action="UpdateUser" id="userForm" method="post" class="form" style="color:black;">
                         <p class="instruction">Foto:</p>
                         <input type="file" id="myfile" name="myfile">
-                        <input class="form-input" name="id" type="text" hidden="true" value="<%=user.getId_user()%>">
+                        <input class="form-input" name="id" type="text" hidden="true" value="<%=user.getId_user()%>" id="txtId">
                         <p class="instruction">Usuario:</p>
                         <input class="form-input" name="usuario" type="text" value="<%=user.getUsuario()%>">
                         <p class="instruction">Email:</p>
@@ -140,8 +146,10 @@
                         <input class="form-input" name="nombre" type="text" value="<%=user.getNombre()%>">
                         <p class="instruction">Password:</p>
                         <input class="form-input" type="password" name="password" value="<%=user.getPassword()%>">
-                        <button class="btn form-input" type="submit" style="cursor: pointer;">Modificar Cuenta</button>
-                        <a class="btn form-input" style="background-color: red; display: block;" href="BorrarUsuario?id=<%=user.getId_user()%>">Eliminar Cuenta</a>
+                        <div class="action-btns-container">
+                            <button class="btn form-input" type="submit" id="modify">Modificar Cuenta</button>
+                            <a class="btn form-input" id="delete" href="BorrarUsuario?id=<%=user.getId_user()%>">Eliminar Cuenta</a>
+                        </div>
                     </form>
                     <span class="form-note">Or press Esc to close</span>
                 </div>
@@ -150,9 +158,33 @@
                     <i class="ri-close-line"></i>
                 </button>
             </div>
+            <!--CREACIÓN DE NOTAS----------------------------------------------------->
+            <div id="app">
+                <button class="add-note" type="button">+</button>
+                <script src="js/notes.js"></script>
+                <!--CICLO PARA CARGAR LAS NOTAS DE UN USUARIO EN ESPECIFICO-->
+                <%
+                    //TRAER NOTAS DE UN USUARIO
+                    List<Nota> lista = con.getNotasUser(idUser);
+                    for (int i = 0; i < lista.size(); i++) {
+                        JSONObject jsonObject = null;
+                        //GENERAR SENTENCIA JSON
+                        String myJSON = "{\"id_note\":\"" + lista.get(i).getId_note() + "\",\"contenido\":\"" + lista.get(i).getContenido() + "\",\"color\":\"" + lista.get(i).getColor() + "\",\"fondo\":\"" + lista.get(i).getFondo() + "\"}";
+                        try {
+                            jsonObject = new JSONObject(myJSON);
+                        } catch (JSONException e) {
+                            System.out.println("Error " + e.toString());
+                        }
+                %>
+                <script>
+                    //AÑADIR NOTA APARTIR DEL JSON GENERADO
+                    addNotesFromDB(<%=jsonObject%>);
+                </script>
+                <%
+                    }
+                %>
+            </div>
         </div>
-        <script src="js/notes.js"></script>
         <script src="js/reloj.js"></script>
     </body>
-
 </html>

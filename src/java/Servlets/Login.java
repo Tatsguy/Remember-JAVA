@@ -31,7 +31,8 @@ public class Login extends HttpServlet {
         } else {
             HttpSession sesion = request.getSession();
             sesion.setAttribute("id", id);
-            if (usuario.equals("theAdmin") && password.equals("root")) {
+            int rol = conexion.getRol(id);
+            if (rol==1) {
                 response.sendRedirect("administrador.jsp");
             } else {
                 response.sendRedirect("notas.jsp");

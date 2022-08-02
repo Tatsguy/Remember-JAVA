@@ -36,13 +36,15 @@ public class Conexion {
         }
     }
 
+// METODOS DE USUARIO    
     public int insertarUsuario(Usuario user) {
         try {
             String sql = "INSERT INTO users VALUES(null,'"
                     + user.getNombre() + "','"
                     + user.getUsuario() + "','"
                     + user.getEmail() + "','"
-                    + user.getPassword() + "')";
+                    + user.getPassword() + "','"
+                    + user.getRol() + "')";
             conectar();
             int regs = smt.executeUpdate(sql);
             System.out.println("Inserción realizada");
@@ -50,6 +52,40 @@ public class Conexion {
             return regs;
         } catch (SQLException ex) {
             System.out.println("Error " + ex);
+            return 0;
+        }
+    }
+
+    public int modificarUsuario(Usuario user) {
+        try {
+            String sql = "UPDATE users SET "
+                    + "usuario='" + user.getUsuario() + "',"
+                    + "email='" + user.getEmail() + "',"
+                    + "nombre='" + user.getNombre() + "',"
+                    + "rol='" + user.getRol()+ "',"
+                    + "contraseña='" + user.getPassword() + "' "
+                    + "WHERE id_user='" + user.getId_user() + "'";
+            conectar();
+            int regs = smt.executeUpdate(sql);
+            desconectar();
+            System.out.println("Modificación realizada");
+            return regs;
+        } catch (SQLException ex) {
+            System.out.println("Error al modificar" + ex);
+            return 0;
+        }
+    }
+
+    public int borrarUsuario(int id) {
+        try {
+            String sql = "DELETE FROM users WHERE id_user=" + id;
+            conectar();
+            int regs = smt.executeUpdate(sql);
+            desconectar();
+            System.out.println("Se elimino el registro");
+            return regs;
+        } catch (SQLException ex) {
+            System.out.println("Error al eliminar " + ex);
             return 0;
         }
     }
@@ -67,6 +103,7 @@ public class Conexion {
                 u.setUsuario(rs.getString("usuario"));
                 u.setEmail(rs.getString("email"));
                 u.setPassword(rs.getString("contraseña"));
+                u.setRol(rs.getInt("rol"));
                 lista.add(u);
             }
             desconectar();
@@ -85,13 +122,28 @@ public class Conexion {
             rs = smt.executeQuery(sql);
             while (rs.next()) {
                 the_id = rs.getInt("id_user");
-                System.out.println("El id es" + the_id);
             }
             desconectar();
         } catch (SQLException ex) {
             System.out.println("Error al extraer datos" + ex + " " + sql);
         }
         return the_id;
+    }
+
+    public int getRol(int id) {
+        String sql = "SELECT rol FROM users WHERE id_user='" + id + "'";
+        int the_rol = 0;
+        try {
+            conectar();
+            rs = smt.executeQuery(sql);
+            while (rs.next()) {
+                the_rol = rs.getInt("rol");
+            }
+            desconectar();
+        } catch (SQLException ex) {
+            System.out.println("Error al extraer datos" + ex + " " + sql);
+        }
+        return the_rol;
     }
 
     public Usuario buscarId(int id) {
@@ -106,6 +158,7 @@ public class Conexion {
                 u.setUsuario(rs.getString("usuario"));
                 u.setEmail(rs.getString("email"));
                 u.setPassword(rs.getString("contraseña"));
+                u.setRol(rs.getInt("rol"));
             }
             desconectar();
         } catch (SQLException ex) {
@@ -115,9 +168,48 @@ public class Conexion {
         return u;
     }
 
+
+//METODOS DE NOTAS
+    public int insertNota(Nota nota) {
+        try {
+            String sql = "INSERT INTO notes VALUES('"
+                    + nota.getId_note() + "','"
+                    + nota.getContenido() + "','"
+                    + nota.getColor() + "','"
+                    + nota.getFondo() + "','"
+                    + nota.getId_user() + "')";
+            conectar();
+            int regs = smt.executeUpdate(sql);
+            System.out.println("Inserción realizada");
+            desconectar();
+            return regs;
+        } catch (SQLException ex) {
+            System.out.println("Error " + ex);
+            return 0;
+        }
+    }
+
+    public boolean buscarNota(int id) {
+        String sql = "SELECT * FROM notes WHERE id_note=" + id;
+        try {
+            conectar();
+            rs = smt.executeQuery(sql);
+            if (rs.next()) {
+                desconectar();
+                return true;
+            } else {
+                desconectar();
+                return false;
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error al extraer datos" + ex + " " + sql);
+            return false;
+        }
+    }
+
     public List<Nota> getNotasUser(int id) {
         List<Nota> lista = new ArrayList<>();
-        String sql = "SELECT * FROM notes WHERE id_user="+id;
+        String sql = "SELECT * FROM notes WHERE id_user=" + id;
         try {
             conectar();
             rs = smt.executeQuery(sql);
@@ -136,7 +228,7 @@ public class Conexion {
         }
         return lista;
     }
-    
+
     public List<Nota> getNotas() {
         List<Nota> lista = new ArrayList<>();
         String sql = "SELECT * FROM notes";
@@ -157,50 +249,36 @@ public class Conexion {
         }
         return lista;
     }
-    
-     public int modificarUsuario(Usuario user){
+
+    public int updateNota(Nota note) {
         try {
-            String sql = "UPDATE users SET "
-                    +"usuario='"+user.getUsuario()+"',"
-                    +"email='"+user.getEmail()+"',"
-                    +"nombre='"+user.getNombre()+"',"
-                    +"contraseña='"+user.getPassword()+"' "
-                    +"WHERE id_user='"+user.getId_user()+"'";
+            String sql = "UPDATE notes SET "
+                    + "contenido='" + note.getContenido() + "',"
+                    + "color='" + note.getColor() + "',"
+                    + "fondo='" + note.getFondo() + "' "
+                    + "WHERE id_note=" + note.getId_note();
+            System.out.println(sql);
             conectar();
             int regs = smt.executeUpdate(sql);
             desconectar();
             System.out.println("Modificación realizada");
             return regs;
         } catch (SQLException ex) {
-            System.out.println("Error al modificar"+ex);
+            System.out.println("Error al modificar" + ex);
             return 0;
         }
     }
-     
-     public int borrarUsuario(int id){
+
+    public int borrarNota(int id) {
         try {
-            String sql = "DELETE FROM users WHERE id_user="+id;
+            String sql = "DELETE FROM notes WHERE id_note=" + id;
             conectar();
             int regs = smt.executeUpdate(sql);
             desconectar();
             System.out.println("Se elimino el registro");
             return regs;
         } catch (SQLException ex) {
-            System.out.println("Error al eliminar "+ex);
-            return 0;
-        }
-    }
-     
-     public int borrarNota(int id){
-        try {
-            String sql = "DELETE FROM notes WHERE id_note="+id;
-            conectar();
-            int regs = smt.executeUpdate(sql);
-            desconectar();
-            System.out.println("Se elimino el registro");
-            return regs;
-        } catch (SQLException ex) {
-            System.out.println("Error al eliminar "+ex);
+            System.out.println("Error al eliminar " + ex);
             return 0;
         }
     }

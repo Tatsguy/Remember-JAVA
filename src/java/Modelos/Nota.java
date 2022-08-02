@@ -7,6 +7,14 @@ public class Nota {
     public Nota() {
     }
 
+    public Nota(int id_note, String contenido, String color, String fondo, int id_user) {
+        this.id_note = id_note;
+        this.contenido = contenido;
+        this.color = color;
+        this.fondo = fondo;
+        this.id_user = id_user;
+    }
+
     public int getId_note() {
         return id_note;
     }

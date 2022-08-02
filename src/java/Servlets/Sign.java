@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
 
 @WebServlet(name = "Sign", urlPatterns = {"/Sign"})
 public class Sign extends HttpServlet {
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -26,17 +26,26 @@ public class Sign extends HttpServlet {
         String usuario = request.getParameter("usuario");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        int rol = 2;
+        if (request.getParameter("rol") != null) {
+            rol = Integer.parseInt(request.getParameter("rol"));
+        }
         Conexion conexion = new Conexion();
         Usuario user = new Usuario();
         user.setNombre(nombre);
         user.setUsuario(usuario);
         user.setEmail(email);
         user.setPassword(password);
+        user.setRol(rol);
         conexion.insertarUsuario(user);
-        int id=conexion.buscarUser(user.getUsuario(), user.getPassword());
-        HttpSession sesion = request.getSession();
-        sesion.setAttribute("id", id);
-        response.sendRedirect("notas.jsp");
+        if (request.getParameter("rol") != null) {
+            response.sendRedirect("administrador.jsp");
+        } else {
+            int id = conexion.buscarUser(user.getUsuario(), user.getPassword());
+            HttpSession sesion = request.getSession();
+            sesion.setAttribute("id", id);
+            response.sendRedirect("notas.jsp");
+        }
     }
 
     @Override

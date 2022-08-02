@@ -1,8 +1,16 @@
 package Modelos;
 
 public class Usuario {
-    int id_user;
+    int id_user,rol;
     String nombre,usuario,email,password;
+
+    public int getRol() {
+        return rol;
+    }
+
+    public void setRol(int rol) {
+        this.rol = rol;
+    }
 
     public int getId_user() {
         return id_user;
