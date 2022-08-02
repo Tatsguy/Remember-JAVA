@@ -30,6 +30,9 @@
             } else {
                 idUser = Integer.parseInt(sesion.getAttribute("id").toString());
                 user = con.buscarId(idUser);
+                if (con.getRol(idUser) != 1) {
+                    response.sendRedirect("notas.jsp");
+                }
             }
         %>
         <div class="notes">
@@ -38,9 +41,6 @@
             <div class="notes__sidebar">
                 <div class="user">
                     <div class="user-avatar"></div>
-                    <div id="nickname">
-                        <p class="tool-name" id="updateUser">Ver perfil</p>
-                    </div>
                 </div>
                 <div class="tools">
                     <button class="closeIcon">
@@ -49,6 +49,11 @@
                     <div class="tool">
                         <a href="index.html"><i class="ri-home-line"></i>
                             <p class="tool-name">Ir a inicio</p>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="notas.jsp"><i class="ri-booklet-line"></i>
+                            <p class="tool-name">Ver notas</p>
                         </a>
                     </div>
                     <div class="tool">
@@ -96,6 +101,7 @@
                                         <th>NOMBRE</th>
                                         <th>USUARIO</th>
                                         <th>E-MAIL</th>
+                                        <th>ROL</th>
                                         <th>CONTRASEÑA</th>
                                         <th>ACCIONES</th>
                                     </tr>
@@ -105,45 +111,21 @@
                                     <%
                                         List<Usuario> lista = con.mostrarUsuarios();
                                         for (int i = 0; i < lista.size(); i++) {
+                                            String rol = "";
+                                            if(lista.get(i).getRol()==1){
+                                                rol="Administrador";
+                                            }else{
+                                                rol="Usuario";
+                                            }
                                     %>
-                                    <tr data-href="index.html">
+                                    <tr style="cursor: pointer;" data-href="editar-usuario.jsp?id=<%=lista.get(i).getId_user()%>">
                                         <td><%=lista.get(i).getId_user()%></td>
                                         <td><%=lista.get(i).getNombre()%></td>
                                         <td><%=lista.get(i).getUsuario()%></td>
                                         <td><%=lista.get(i).getEmail()%></td>
+                                        <td><%=rol%></td>
                                         <td><%=lista.get(i).getPassword()%></td>
-                                        <td><a href="BorrarUsuario?id=<%=lista.get(i).getId_user()%>&admin=true">borrar</a></td>
-                                    </tr>
-                                    <%
-                                        }
-                                    %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="table-container">
-                        <h2>Notas</h2>
-                        <div class="table-scroll">
-                            <table class="content-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>CONTENIDO</th>
-                                        <th>USER-ID</th>
-                                        <th>ACCIONES</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <%
-                                        List<Nota> listaNota = con.getNotas();
-                                        for (int i = 0; i < listaNota.size(); i++) {
-                                    %>
-                                    <tr data-href="index.html">
-                                        <td><%=listaNota.get(i).getId_note()%></td>
-                                        <td><%=listaNota.get(i).getContenido()%></td>
-                                        <td><%=listaNota.get(i).getId_user()%></td>
-                                        <td><a href="BorrarNota?id=<%=listaNota.get(i).getId_note()%>">borrar</a></td>
+                                        <td><a style="color: red;" href="BorrarUsuario?id=<%=lista.get(i).getId_user()%>">BORRAR</a></td>
                                     </tr>
                                     <%
                                         }
@@ -155,17 +137,16 @@
                 </div>
 
                 <div class="admin-tools">
-                    <button class="admin-btn">Añadir Usuario</button>
-                    <button class="admin-btn">Modificar Usuario</button>
+                    <a href="sing-in.jsp" class="admin-btn">Añadir Usuario</a>
                 </div>
             </div>
         </div>
         <script src="js/reloj.js"></script>
         <script>
-            document.addEventListener("DOMContentLoaded", ()=>{
+            document.addEventListener("DOMContentLoaded", () => {
                 const rows = document.querySelectorAll("tr[data-href]");
-                rows.forEach(row =>{
-                    row.addEventListener("click", ()=>{
+                rows.forEach(row => {
+                    row.addEventListener("click", () => {
                         window.location.href = row.dataset.href;
                     });
                 });

@@ -1,3 +1,4 @@
+<%@page import="BD.Conexion"%>
 <%@page import="Modelos.Encriptacion"%>
 <!DOCTYPE html>
 <html lang="es">
@@ -5,7 +6,6 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
         <meta name="author" content="Remember">
         <meta name="copyright" content="Remember">
         <meta name="description" content="Pantalla de registrarse"> 
@@ -16,11 +16,20 @@
         <link rel="shortcut icon" href="images/logoV.png" type="image/x-icon">
     </head>
     <body>
-
+        <%
+            HttpSession sesion = request.getSession();
+            Conexion con = new Conexion();
+            int idUser=0;
+            String linkRetorno="index.html";
+            if (sesion.getAttribute("id") != null)
+                idUser = Integer.parseInt(sesion.getAttribute("id").toString());
+            if (con.getRol(idUser) == 1)
+                linkRetorno="administrador.jsp";
+        %>
         <!--REGISTRARSE-->
         <div class="fondo">
             <div class="contenido">
-                <a id="back-button" href="index.html">&lt;</a>
+                <a id="back-button" href="<%=linkRetorno%>">&lt;</a>
                 <div class="imagen">
                     <img src="images/index/Logo.png" id="logo" alt="">
                 </div>
@@ -39,7 +48,18 @@
 
                                 <input type="password" placeholder="Crea una contraseña" name="password" id="Password">
                                 <span class="noVisible" id="spanPassword">Ingrese su contraseña</span>
-
+                                <%
+                                    if (con.getRol(idUser) == 1) {
+                                %>
+                                <div style="display: flex; justify-content: space-around;">
+                                    <input type="radio" name="rol" id="Admin" value="1">
+                                    <label for="Admin">Administrador</label>
+                                    <input type="radio" name="rol" id="User" checked="true" value="2">
+                                    <label for="User">Usuario</label>
+                                </div>
+                                <%
+                                    }
+                                %>
                                 <input class="button" type="submit" value="Comenzar"/>
                             </div>
                         </div>
